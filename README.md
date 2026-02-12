@@ -1,71 +1,86 @@
-# YouTube Notes Generator
+# 🎬 YouTube → AI Notes Generator
 
-This project generates structured and high-quality notes from YouTube videos using Google Gemini AI.
+An AI-powered tool that converts YouTube videos into clean, structured, and easy-to-read notes using **Google Gemini**.
 
-Instead of downloading audio, it extracts the video transcript and sends it to Gemini to generate well-organized notes. This makes the system faster and more efficient.
+Instead of downloading audio, this application extracts the video transcript and processes it with Gemini to generate high-quality notes quickly and efficiently.
 
 ---
-## Screen Shot
 
-![Image](ScreenShot/Image_1.png)
-![Image](ScreenShot/Image_2.png)
+## 📸 Screenshots
 
-## Features
+<p align="center">
+  <img src="ScreenShot/Image_1.png" width="800">
+</p>
 
-* Generate structured notes from YouTube videos
-* Uses video transcripts (no audio download required)
-* Powered by Google Gemini (Flash free-tier supported)
-* Multiple note styles:
+<p align="center">
+  <img src="ScreenShot/Image_2.png" width="800">
+</p>
 
-  * Tutorial-based notes
-  * Class/lecture-style notes
+---
+
+## ✨ Features
+
+* ⚡ Transcript-based processing (no audio download required)
+* 🧠 Powered by Google Gemini (Flash free-tier supported)
+* 📝 Structured and organized note generation
+* 🎯 Multiple note styles:
+
+  * Tutorial-based format
+  * Class/Lecture format
   * Custom prompt option
-* Download notes as a Markdown file
-* Simple UI built with Streamlit
+* 📥 Export notes as Markdown
+* 🖥️ Clean and intuitive Streamlit UI
 
 ---
 
-## How It Works
+## 🏗️ Architecture Overview
 
-1. Extract transcript from the YouTube video
-2. Clean and process the text
-3. Send transcript to Gemini
-4. Generate structured notes
+```
+YouTube Video
+      ↓
+Transcript Extraction (yt-dlp)
+      ↓
+Text Cleaning & Processing
+      ↓
+Gemini AI (generate_content)
+      ↓
+Structured Notes Output
+```
 
-No audio processing. No FFmpeg required.
+This approach avoids audio processing, reduces latency, and improves efficiency.
 
 ---
 
-## Installation
+## 🚀 Installation
 
-### 1. Clone the repository
+### 1️⃣ Clone the Repository
 
 ```bash
 git clone https://github.com/ShivamAttri05/Youtube-AI-Notes-Generator.git
-cd youtube-notes-generator
+cd Youtube-AI-Notes-Generator
 ```
 
-### 2. Create a virtual environment
+### 2️⃣ Create a Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-### 3. Activate the virtual environment
+### 3️⃣ Activate the Environment
 
-**Windows:**
+**Windows**
 
 ```bash
 venv\Scripts\activate
 ```
 
-**Mac/Linux:**
+**Mac/Linux**
 
 ```bash
 source venv/bin/activate
 ```
 
-### 4. Install dependencies
+### 4️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -73,20 +88,21 @@ pip install -r requirements.txt
 
 ---
 
-## Environment Setup
+## 🔑 Environment Setup
 
-Create a `.env` file in the root directory and add:
+Create a `.env` file in the project root:
 
 ```
 GOOGLE_API_KEY=your_api_key_here
 ```
 
-You can get your Gemini API key from:
-[https://ai.google.dev/](https://ai.google.dev/)
+You can obtain a Gemini API key from:
+
+👉 [https://ai.google.dev/](https://ai.google.dev/)
 
 ---
 
-## Run the Application
+## ▶️ Run the Application
 
 ```bash
 streamlit run app.py
@@ -98,30 +114,37 @@ Then open:
 http://localhost:8501
 ```
 
-Paste a YouTube link and generate notes.
+Paste a YouTube URL and generate structured notes instantly.
 
 ---
 
-## Model Used
-
-Recommended for free usage:
-
-```
-gemini-3-flash-preview
-```
-
----
-
-## Limitations
+## ⚠️ Limitations
 
 * Requires videos with available subtitles
 * English subtitles recommended
-* Very long videos may need transcript chunking
+* Very long transcripts may require chunking (future improvement)
 
 ---
 
-## Contributing
+## 📌 Future Improvements
 
-Feel free to open issues or submit pull requests.
+* Transcript → Audio fallback mechanism
+* Language selection support
+* Automatic topic detection
+* Transcript chunking for long videos
+* Deployment support (Streamlit Cloud / Docker)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome.
+Feel free to open an issue or submit a pull request.
+
+---
+
+## ⭐ Support
+
+If you found this project helpful, consider giving it a star ⭐ on GitHub.
 
 ---
