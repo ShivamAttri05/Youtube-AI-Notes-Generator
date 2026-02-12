@@ -5,6 +5,9 @@ This project generates structured and high-quality notes from YouTube videos usi
 Instead of downloading audio, it extracts the video transcript and sends it to Gemini to generate well-organized notes. This makes the system faster and more efficient.
 
 ---
+## Screen Shot
+
+![Image](ScreenShot\Image_1.png)
 
 ## Features
 

@@ -110,7 +110,7 @@ def get_youtube_transcript(url: str):
 
 # ---------------- Local Test ----------------
 if __name__ == "__main__":
-    test_url = "https://www.youtube.com/watch?v=nbicUrB7Mcc"
+    test_url = "https://www.youtube.com/shorts/vJNkqS08D2M"
 
     transcript = get_youtube_transcript(test_url)
 
