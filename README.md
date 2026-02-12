@@ -8,6 +8,7 @@ Instead of downloading audio, it extracts the video transcript and sends it to G
 ## Screen Shot
 
 ![Image](ScreenShot/Image_1.png)
+![Image](ScreenShot/Image_2.png)
 
 ## Features
 
