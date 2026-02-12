@@ -1,9 +1,3 @@
-Alright, let’s rewrite your README in a clean, simple, normal tone — not overly dramatic, not corporate, just clear and professional.
-
-Here’s a better version:
-
----
-
 # YouTube Notes Generator
 
 This project generates structured and high-quality notes from YouTube videos using Google Gemini AI.
@@ -43,7 +37,7 @@ No audio processing. No FFmpeg required.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/youtube-notes-generator.git
+git clone https://github.com/ShivamAttri05/Youtube-AI-Notes-Generator.git
 cd youtube-notes-generator
 ```
 
