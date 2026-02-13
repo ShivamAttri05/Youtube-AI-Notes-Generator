@@ -5,6 +5,7 @@ import requests
 from os.path import dirname as up
 from yt_dlp import YoutubeDL
 from custom_logger import logger
+from .constants import DIR_TRANSCRIPTS, BASE_DIR
 
 sys.path.append(os.path.abspath(os.path.join(up(__file__), os.pardir)))
 
@@ -69,6 +70,22 @@ def get_youtube_transcript(url: str):
     Extract English subtitles from YouTube without downloading audio.
     """
     try:
+        # Ensure transcripts cache directory exists
+        transcripts_dir = os.path.join(str(BASE_DIR), DIR_TRANSCRIPTS)
+        os.makedirs(transcripts_dir, exist_ok=True)
+
+        # Attempt to use cached transcript if available
+        try:
+            title = get_youtube_title(url) or "transcript"
+            safe_name = sanitize_filename(title)
+            cache_path = os.path.join(transcripts_dir, f"{safe_name}.txt")
+            if os.path.exists(cache_path):
+                logger.info(f"Loading cached transcript: {cache_path}")
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    return f.read()
+        except Exception:
+            # If title extraction or cache read fails, continue to fresh extraction
+            pass
         ydl_opts = {
             "skip_download": True,
             "writesubtitles": True,
@@ -99,6 +116,17 @@ def get_youtube_transcript(url: str):
                 return None
 
             cleaned_text = clean_vtt_content(response.text)
+
+            # Save to cache
+            try:
+                title = get_youtube_title(url) or "transcript"
+                safe_name = sanitize_filename(title)
+                cache_path = os.path.join(transcripts_dir, f"{safe_name}.txt")
+                with open(cache_path, "w", encoding="utf-8") as f:
+                    f.write(cleaned_text)
+                logger.info(f"Transcript cached: {cache_path}")
+            except Exception as e:
+                logger.warning(f"Failed to cache transcript: {str(e)}")
 
             logger.info("Transcript extracted successfully.")
             return cleaned_text

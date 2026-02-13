@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(up(__file__), os.pardir)))
 
 from google import genai
 from utils import GOOGLE_API_KEY, get_youtube_transcript
+from utils.constants import CHUNK_SIZE
 from custom_logger import logger
 
 # Create Gemini client
@@ -35,21 +36,78 @@ def generate_notes_audio(
     logger.info(f"Model used: {model_name}")
 
     try:
-        response = client.models.generate_content(
+        # If transcript is short enough, send directly
+        if len(transcript) <= CHUNK_SIZE:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=[
+                    {
+                        "role": "user",
+                        "parts": [
+                            {"text": system_prompt},
+                            {"text": user_prompt},
+                            {"text": transcript},
+                        ],
+                    }
+                ],
+            )
+            return response
+
+        # Otherwise, chunk the transcript and generate per-chunk notes
+        logger.info("Transcript exceeds chunk size; splitting into chunks.")
+        chunks = [transcript[i : i + CHUNK_SIZE] for i in range(0, len(transcript), CHUNK_SIZE)]
+        partial_notes = []
+
+        for idx, chunk in enumerate(chunks, start=1):
+            logger.info(f"Generating notes for chunk {idx}/{len(chunks)}")
+            try:
+                resp = client.models.generate_content(
+                    model=model_name,
+                    contents=[
+                        {
+                            "role": "user",
+                            "parts": [
+                                {"text": system_prompt},
+                                {"text": f"{user_prompt}\n\n[Chunk {idx}/{len(chunks)}]"},
+                                {"text": chunk},
+                            ],
+                        }
+                    ],
+                )
+
+                partial_text = getattr(resp, "text", "")
+                if partial_text:
+                    partial_notes.append(partial_text)
+                else:
+                    logger.warning(f"Empty response for chunk {idx}")
+            except Exception as e:
+                logger.error(f"Chunk generation failed for chunk {idx}: {str(e)}")
+                return None
+
+        # Stitch partial notes together by asking the model to merge them
+        merge_prompt = (
+            "Merge the following partial notes into a single, clean, deduplicated set of notes. "
+            "Preserve logical order, headings, and important details. Remove duplicates and keep the result concise.\n\n"
+            "Partial notes:\n\n"
+            + "\n\n---\n\n".join(partial_notes)
+        )
+
+        logger.info("Merging partial notes into final document.")
+
+        final_response = client.models.generate_content(
             model=model_name,
             contents=[
                 {
                     "role": "user",
                     "parts": [
                         {"text": system_prompt},
-                        {"text": user_prompt},
-                        {"text": transcript},
+                        {"text": merge_prompt},
                     ],
                 }
             ],
         )
 
-        return response
+        return final_response
 
     except Exception as e:
         logger.error(f"Gemini generation failed: {str(e)}")

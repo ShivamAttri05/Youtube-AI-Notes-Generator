@@ -1,8 +1,14 @@
+import os
 import streamlit as st
+from dotenv import load_dotenv
 
 from custom_logger import logger
-from yt_notes_generator import generate_notes_audio
 from utils import TUTORIAL_ONLY, CLASS_LECTURE
+
+# Load environment variables early (so UI can surface missing keys safely)
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # ---------------- Page Config ----------------
 st.set_page_config(
@@ -66,8 +72,12 @@ with col1:
 
     generate_button = st.button(
         "🚀 Generate Notes",
-        use_container_width=True
+        use_container_width=True,
+        disabled=not GOOGLE_API_KEY,
     )
+
+    if not GOOGLE_API_KEY:
+        st.error("❌ Missing GOOGLE_API_KEY. Copy .env.example -> .env and set your key.")
 
     if st.session_state.generated_notes:
         st.download_button(
@@ -87,43 +97,49 @@ with col2:
         if not youtube_url:
             st.warning("⚠️ Please enter a valid YouTube URL.")
         else:
-            progress_bar = st.progress(0)
-            status_text = st.empty()
+            if not GOOGLE_API_KEY:
+                st.error("❌ Missing `GOOGLE_API_KEY`. Set it in `.env` or use Streamlit secrets.")
+            else:
+                # Delay importing the Gemini-backed function until after API key check
+                from yt_notes_generator import generate_notes_audio
 
-            try:
-                # Step 1: Extract transcript
-                status_text.info("📄 Extracting transcript...")
-                progress_bar.progress(30)
+                progress_bar = st.progress(0)
+                status_text = st.empty()
 
-                response = generate_notes_audio(
-                    youtube_url=youtube_url,
-                    model_name=model_name,
-                    system_prompt=system_prompt,
-                    user_prompt=user_prompt,
-                )
+                try:
+                    # Step 1: Extract transcript
+                    status_text.info("📄 Extracting transcript...")
+                    progress_bar.progress(30)
 
-                # Step 2: Generate notes
-                status_text.info("🧠 Generating AI notes...")
-                progress_bar.progress(70)
+                    response = generate_notes_audio(
+                        youtube_url=youtube_url,
+                        model_name=model_name,
+                        system_prompt=system_prompt,
+                        user_prompt=user_prompt,
+                    )
 
-                if not response:
-                    st.error("❌ Transcript not available or AI failed. Check logs.")
-                else:
-                    full_response = getattr(response, "text", "")
+                    # Step 2: Generate notes
+                    status_text.info("🧠 Generating AI notes...")
+                    progress_bar.progress(70)
 
-                    if not full_response.strip():
-                        st.error("❌ No notes generated.")
+                    if not response:
+                        st.error("❌ Transcript not available or AI failed. Check logs.")
                     else:
-                        st.session_state.generated_notes = full_response
-                        progress_bar.progress(100)
-                        status_text.success("✅ Notes generated successfully!")
-                        st.markdown(full_response)
+                        full_response = getattr(response, "text", "")
 
-                        logger.info("Notes generated successfully.")
+                        if not full_response.strip():
+                            st.error("❌ No notes generated.")
+                        else:
+                            st.session_state.generated_notes = full_response
+                            progress_bar.progress(100)
+                            status_text.success("✅ Notes generated successfully!")
+                            st.markdown(full_response)
 
-            except Exception as e:
-                logger.error(f"App crashed: {str(e)}")
-                st.error(f"❌ Error: {str(e)}")
+                            logger.info("Notes generated successfully.")
+
+                except Exception as e:
+                    logger.error(f"App crashed: {str(e)}")
+                    st.error(f"❌ Error: {str(e)}")
 
     elif st.session_state.generated_notes:
         st.markdown(st.session_state.generated_notes)

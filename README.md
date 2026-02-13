@@ -90,7 +90,13 @@ pip install -r requirements.txt
 
 ## 🔑 Environment Setup
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root. You can copy the provided example:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` and set:
 
 ```
 GOOGLE_API_KEY=your_api_key_here
