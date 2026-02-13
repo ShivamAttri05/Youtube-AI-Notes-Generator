@@ -1,14 +1,7 @@
-import os
 import streamlit as st
-from dotenv import load_dotenv
 
 from custom_logger import logger
-from utils import TUTORIAL_ONLY, CLASS_LECTURE
-
-# Load environment variables early (so UI can surface missing keys safely)
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-load_dotenv(os.path.join(BASE_DIR, ".env"))
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+from utils import TUTORIAL_ONLY, CLASS_LECTURE, GOOGLE_API_KEY
 
 # ---------------- Page Config ----------------
 st.set_page_config(
@@ -93,20 +86,19 @@ with col2:
     st.subheader("📄 Generated Notes")
 
     if generate_button:
-
         if not youtube_url:
             st.warning("⚠️ Please enter a valid YouTube URL.")
+        elif not GOOGLE_API_KEY:
+            st.error("❌ Missing `GOOGLE_API_KEY`. Set it in `.env` or use Streamlit secrets.")
         else:
-            if not GOOGLE_API_KEY:
-                st.error("❌ Missing `GOOGLE_API_KEY`. Set it in `.env` or use Streamlit secrets.")
-            else:
-                # Delay importing the Gemini-backed function until after API key check
-                from yt_notes_generator import generate_notes_audio
+            # Delay importing the Gemini-backed function until after API key check
+            from yt_notes_generator import generate_notes_audio
 
-                progress_bar = st.progress(0)
-                status_text = st.empty()
+            progress_bar = st.progress(0)
+            status_text = st.empty()
 
-                try:
+            try:
+                with st.spinner("Processing video and generating notes..."):
                     # Step 1: Extract transcript
                     status_text.info("📄 Extracting transcript...")
                     progress_bar.progress(30)
@@ -137,9 +129,9 @@ with col2:
 
                             logger.info("Notes generated successfully.")
 
-                except Exception as e:
-                    logger.error(f"App crashed: {str(e)}")
-                    st.error(f"❌ Error: {str(e)}")
+            except Exception as e:
+                logger.error(f"App crashed: {str(e)}")
+                st.error(f"❌ Error: {str(e)}")
 
     elif st.session_state.generated_notes:
         st.markdown(st.session_state.generated_notes)

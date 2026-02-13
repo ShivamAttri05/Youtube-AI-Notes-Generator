@@ -9,9 +9,6 @@ from utils import GOOGLE_API_KEY, get_youtube_transcript
 from utils.constants import CHUNK_SIZE
 from custom_logger import logger
 
-# Create Gemini client
-client = genai.Client(api_key=GOOGLE_API_KEY)
-
 
 def generate_notes_audio(
     youtube_url: str,
@@ -20,9 +17,18 @@ def generate_notes_audio(
     user_prompt: str,
 ):
     """
-    Extracts YouTube transcript and generates notes using Gemini.
-    No audio download. No file upload. Faster and cleaner.
+    Extract YouTube transcript and generate notes using Gemini.
+
+    This uses text-only processing (no audio download or file upload) for
+    faster, cheaper inference while keeping the behavior of the app unchanged.
     """
+
+    if not GOOGLE_API_KEY:
+        logger.error("Missing GOOGLE_API_KEY; cannot generate notes with Gemini.")
+        return None
+
+    # Create Gemini client lazily so missing keys fail here instead of at import time
+    client = genai.Client(api_key=GOOGLE_API_KEY)
 
     # ---------------- Get Transcript ----------------
     transcript = get_youtube_transcript(youtube_url)
